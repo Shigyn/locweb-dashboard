@@ -189,6 +189,12 @@ function ongletContenu(hote, ctx) {
       h('div.carte-corps.serre', zones)));
   }
 
+  const zoneHistorique = h('div');
+  hote.append(zoneHistorique);
+  D.listerHistorique(client.id).then((historique) => {
+    if (historique.length) zoneHistorique.append(carteHistorique(historique));
+  }).catch(() => {}); // annexe a l'ecran principal, un echec ici ne doit pas gener l'edition
+
   hote.append(barre);
   majBarre();
 
@@ -249,6 +255,31 @@ function ongletContenu(hote, ctx) {
 function joli(cle) {
   const s = String(cle).replace(/_/g, ' ');
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function carteHistorique(historique) {
+  const corps = h('tbody');
+  for (const l of historique) {
+    const detail = h('tr', { hidden: true },
+      h('td', { colspan: 3, style: { background: 'var(--surface-creux)' } },
+        h('div', { style: { display: 'grid', gap: '4px', fontSize: '.82rem', maxWidth: '640px' } },
+          h('div', h('span', { style: { color: 'var(--sourdine)' } }, 'Avant : '), l.ancienne_valeur || '(vide)'),
+          h('div', h('span', { style: { color: 'var(--sourdine)' } }, 'Apres : '), l.nouvelle_valeur || '(vide)'))));
+
+    const ligne = h('tr', { style: { cursor: 'pointer' }, onclick: () => { detail.hidden = !detail.hidden; } },
+      h('td', MANIFEST[l.cle_bloc]?.label || l.cle_bloc),
+      h('td', h('span.etat', { 'data-ton': l.publie_par === 'client' ? 'bien' : '' },
+        l.publie_par === 'client' ? 'Client' : 'LocWeb')),
+      h('td', { style: { color: 'var(--sourdine)', fontSize: '.82rem' } }, depuis(l.date_publication)));
+
+    corps.append(ligne, detail);
+  }
+
+  return h('div.carte',
+    h('div.carte-tete', h('h2', 'Historique des publications')),
+    h('div.carte-corps.serre', h('div.tableau-cadre', h('table',
+      h('thead', h('tr', h('th', 'Champ'), h('th', 'Publie par'), h('th', 'Quand'))),
+      corps))));
 }
 
 /* ==================================================================

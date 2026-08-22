@@ -101,6 +101,18 @@ export async function publier(clientId) {
   return data;
 }
 
+// publier_client() logue une ligne par champ publie (voir sql/02-historique.sql).
+export async function listerHistorique(clientId, limite = 20) {
+  const { data, error } = await sb
+    .from('historique_publications')
+    .select('cle_bloc, ancienne_valeur, nouvelle_valeur, publie_par, date_publication')
+    .eq('client_id', clientId)
+    .order('date_publication', { ascending: false })
+    .limit(limite);
+  if (error) throw error;
+  return data || [];
+}
+
 // Combien de modifications attendent d'etre publiees, par client.
 // L'index partiel `idx_contenu_brouillon` ne couvre que les lignes
 // concernees : meme avec des milliers de zones, cette requete ne lit

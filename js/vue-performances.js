@@ -59,6 +59,30 @@ export async function rendre(page) {
         h('span', h('i', { style: { background: 'var(--ambre)' } }), 'Demandes')),
     )));
 
+  /* ---------- provenance du trafic ---------- */
+
+  if (visites.length) {
+    const parSource = new Map();
+    for (const v of visites) {
+      const s = classerSource(v.referent);
+      parSource.set(s, (parSource.get(s) || 0) + 1);
+    }
+    const lignesSource = [...parSource.entries()].sort((a, b) => b[1] - a[1]);
+    const max = lignesSource[0][1];
+
+    page.append(h('div.carte',
+      h('div.carte-tete', h('h2', 'Provenance du trafic — 30 derniers jours')),
+      h('div.carte-corps', h('div', { style: { display: 'grid', gap: '10px' } },
+        ...lignesSource.map(([source, n]) => h('div', {
+          style: { display: 'grid', gridTemplateColumns: '110px 1fr 60px', gap: '12px', alignItems: 'center' },
+        },
+          h('span', { style: { fontSize: '.86rem', fontWeight: '600' } }, source),
+          h('div', { style: { background: 'var(--surface-haute)', borderRadius: '100px', height: '8px', overflow: 'hidden' } },
+            h('div', { style: { background: 'var(--encre-douce)', height: '100%', width: `${(n / max * 100).toFixed(0)}%`, borderRadius: '100px' } })),
+          h('span.mono', { style: { fontSize: '.82rem', textAlign: 'right', color: 'var(--sourdine)' } }, nombre(n))),
+        )))));
+  }
+
   /* ---------- classement par client ---------- */
 
   const parClient = new Map(clients.map((c) => [c.id, { client: c, visites: 0, demandes: 0 }]));
@@ -121,4 +145,18 @@ function graphe(visites, demandesSerie) {
     `,
   });
   return svg;
+}
+
+/* Classement du referent brut en source lisible. Beaucoup de visiteurs
+   n'ont aucun referent (favori, application, HTTPS -> HTTPS direct) : ce
+   n'est pas une lacune de la mesure, c'est le comportement normal du web,
+   d'ou le libelle "Direct" plutot qu'une case vide. */
+function classerSource(referent) {
+  if (!referent) return 'Direct';
+  const r = referent.toLowerCase();
+  if (r.includes('google.')) return 'Google';
+  if (r.includes('facebook.com') || r.includes('fb.com')) return 'Facebook';
+  if (r.includes('instagram.com')) return 'Instagram';
+  if (r.includes('bing.com')) return 'Bing';
+  return 'Autres';
 }
