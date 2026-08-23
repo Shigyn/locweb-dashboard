@@ -177,15 +177,24 @@ function ongletContenu(hote, ctx) {
   const ordre = [...GROUP_ORDER.filter((g) => groupes.has(g)),
                  ...[...groupes.keys()].filter((g) => !GROUP_ORDER.includes(g))];
 
+  // Sections repliees par defaut : un site fait couramment quarante a
+  // cinquante zones, toutes deployees d'un coup la page devient un mur
+  // de champs illisible. Une section qui a des modifications en attente
+  // s'ouvre d'office — on ne publie pas sans avoir relu.
   for (const nomGroupe of ordre) {
     const lignes = groupes.get(nomGroupe);
+    const enAttenteIci = lignes.filter((l) => l.valeur_brouillon !== null).length;
     const zones = h('div.zones');
     lignes.forEach((l) => zones.append(champ(l)));
-    hote.append(h('div.carte',
-      h('div.carte-tete',
+
+    hote.append(h('details.carte.carte-pliable', { open: enAttenteIci > 0 },
+      h('summary.carte-tete',
         h('h2', nomGroupe),
-        h('span.droite', h('span', { style: { color: 'var(--sourdine)', fontSize: '.8rem' } },
-          `${lignes.length} zone${lignes.length > 1 ? 's' : ''}`))),
+        h('span.droite',
+          enAttenteIci ? h('span.etat', { 'data-ton': 'veille' }, `${enAttenteIci} en attente`) : null,
+          h('span', { style: { color: 'var(--sourdine)', fontSize: '.8rem' } },
+            `${lignes.length} zone${lignes.length > 1 ? 's' : ''}`),
+          h('span.carte-chevron', { html: '&rsaquo;' }))),
       h('div.carte-corps.serre', zones)));
   }
 

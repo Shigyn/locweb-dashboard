@@ -339,6 +339,18 @@ input::placeholder, textarea::placeholder { color: var(--sourdine); opacity: .7;
 .carte-corps { padding: 17px; }
 .carte-corps.serre { padding: 0; }
 
+/* Carte depliable : la barre de titre devient cliquable. Repliee, elle
+   n'affiche plus de bordure basse — sinon elle flotte sans rien dessous. */
+.carte-pliable > .carte-tete{ cursor: pointer; list-style: none; transition: background-color .14s; }
+.carte-pliable > .carte-tete::-webkit-details-marker{ display: none; }
+.carte-pliable > .carte-tete:hover{ background: var(--surface-haute); }
+.carte-pliable:not([open]) > .carte-tete{ border-bottom: 0; }
+.carte-chevron{
+  color: var(--sourdine); font-size: 1.35rem; line-height: 1;
+  transition: transform .2s;
+}
+.carte-pliable[open] .carte-chevron{ transform: rotate(90deg); }
+
 .section-titre {
   font-size: .74rem; font-weight: 700; letter-spacing: .1em;
   text-transform: uppercase; color: var(--sourdine);
