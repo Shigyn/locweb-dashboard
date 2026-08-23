@@ -28,3 +28,7 @@ alter table profils_client add column if not exists deja_fait_pub      boolean;
 alter table profils_client add column if not exists budget_pub_mensuel numeric(10,2);
 alter table profils_client add column if not exists utilise_google_ads boolean;
 alter table profils_client add column if not exists utilise_meta_ads   boolean;
+
+-- Canaux d'acquisition actuels (bouche a oreille, Google, reseaux...) :
+-- dit sur quel levier appuyer en priorite.
+alter table profils_client add column if not exists canaux_actuels text[];
