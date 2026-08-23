@@ -20,6 +20,10 @@
 --  1. Questionnaire d'accueil (vue-onboarding.js)
 -- -------------------------------------------------------------------
 
+-- Grande famille choisie en carte a l'etape 1 : artisan, independant,
+-- restaurateur, autre. Sert a trier vite ; metier_precis donne le detail.
+alter table profils_client add column if not exists secteur        text;
+
 -- Metier et ville tels que le CLIENT les decrit. Volontairement
 -- distincts de clients.metier / clients.ville, qui sont les champs de
 -- l'operateur : les deux peuvent legitimement differer, et ecraser la
@@ -92,14 +96,14 @@ create unique index if not exists clients_code_parrainage_idx
 -- -------------------------------------------------------------------
 --  4. Verification
 -- -------------------------------------------------------------------
---  Doit renvoyer 10 lignes. Si une manque, l'app fera semblant
+--  Doit renvoyer 11 lignes. Si une manque, l'app fera semblant
 --  d'enregistrer ce champ sans jamais le conserver.
 
 select column_name
 from information_schema.columns
 where table_name = 'profils_client'
   and column_name in (
-    'metier_precis', 'localisation', 'objectifs', 'canaux_actuels',
+    'secteur', 'metier_precis', 'localisation', 'objectifs', 'canaux_actuels',
     'contact_prenom', 'contact_nom', 'contact_email', 'contact_telephone',
     'zone_intervention', 'reseaux')
 order by column_name;
